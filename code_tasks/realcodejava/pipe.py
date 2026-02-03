@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from lm_eval.api.filter import Filter
 from lm_eval.api.registry import register_filter
+from lm_eval.api.registry import FILTER_REGISTRY
 
 try:
     from repotest import __version__ as repotest_version
@@ -70,72 +71,73 @@ def doc_to_text_realcode_java(doc: Dict[str, Any]) -> str:
     return instruction
 
 
-@register_filter("extract_from_tag_realcode_java")
-class FromTagExtractorRCJava(Filter):
-    DISABLE_ON_PREDICT_ONLY = True
+if not FILTER_REGISTRY.get("extract_from_tag_realcode_java", None):
+    @register_filter("extract_from_tag_realcode_java")
+    class FromTagExtractorRCJava(Filter):
+        DISABLE_ON_PREDICT_ONLY = True
 
-    def __init__(self) -> None:
-        super().__init__()
+        def __init__(self) -> None:
+            super().__init__()
 
-    def apply(
-        self,
-        resps: List[List[str]],
-        docs: List[Dict[str, Any]],
-        predict_only: bool = False,
-    ) -> List[List[str]]:
-        """
-        Extract code blocks from responses.
+        def apply(
+            self,
+            resps: List[List[str]],
+            docs: List[Dict[str, Any]],
+            predict_only: bool = False,
+        ) -> List[List[str]]:
+            """
+            Extract code blocks from responses.
 
-        Parameters
-        ----------
-        resps : list of list of str
-            List of generations per document.
-        docs : list of dict
-            Unused, present for compatibility.
+            Parameters
+            ----------
+            resps : list of list of str
+                List of generations per document.
+            docs : list of dict
+                Unused, present for compatibility.
 
-        Returns
-        -------
-        list of list of str
-            Code blocks extracted from between markdown tags.
-        """
-        if predict_only:
-            return resps
-        code_results = []
-        for sample in resps:
-            sample_metrics = list(map(self._extract_from_tag, sample))
-            code_results.append(sample_metrics)
-        return code_results
+            Returns
+            -------
+            list of list of str
+                Code blocks extracted from between markdown tags.
+            """
+            if predict_only:
+                return resps
+            code_results = []
+            for sample in resps:
+                sample_metrics = list(map(self._extract_from_tag, sample))
+                code_results.append(sample_metrics)
+            return code_results
 
-    def _extract_from_tag(self, text: str) -> str:
-        """
-        Extract text between triple-backtick Java tags.
+        def _extract_from_tag(self, text: str) -> str:
+            """
+            Extract text between triple-backtick Java tags.
 
-        Parameters
-        ----------
-        text : str
-            Full model output text.
+            Parameters
+            ----------
+            text : str
+                Full model output text.
 
-        Returns
-        -------
-        str
-            Extracted code or original text if tags not found.
-        """
-        if text is None:
-            return ""
-        tag_start = "```java"
-        tag_end = "```"
-        index_start = text.find(tag_start)
+            Returns
+            -------
+            str
+                Extracted code or original text if tags not found.
+            """
+            if text is None:
+                return ""
+            tag_start = "```java"
+            tag_end = "```"
+            index_start = text.find(tag_start)
 
-        if index_start == -1:
-            index_end = text.find(tag_end, 0)
-        else:
-            index_end = text.find(tag_end, index_start + len(tag_start))
+            if index_start == -1:
+                index_end = text.find(tag_end, 0)
+            else:
+                index_end = text.find(tag_end, index_start + len(tag_start))
 
-        if index_end != -1:
-            text = text[:index_end]
-        if index_start != -1:
-            text = text[index_start + len(tag_start):]
-        return text
+            if index_end != -1:
+                text = text[:index_end]
+            if index_start != -1:
+                text = text[index_start + len(tag_start):]
+            return text
 
 
 def cut_c_style_func_body(prediction: str, left_ctx: Optional[str] = None):
@@ -190,174 +192,175 @@ def get_run_id():
     return datetime.now().strftime("%Y%m%dT%H%M%S")
 
 
-@register_filter("scoring_realcode_java")
-class ScoringFilterRCJava(Filter):
-    DISABLE_ON_PREDICT_ONLY = True
+if not FILTER_REGISTRY.get("scoring_realcode_java", None):
+    @register_filter("scoring_realcode_java")
+    class ScoringFilterRCJava(Filter):
+        DISABLE_ON_PREDICT_ONLY = True
 
-    def __init__(
-        self,
-    ) -> None:
-        """
-        Initializes the scoring filter with configuration for dataset, paths and logging.
-        """
-        super().__init__()
+        def __init__(
+            self,
+        ) -> None:
+            """
+            Initializes the scoring filter with configuration for dataset, paths and logging.
+            """
+            super().__init__()
 
-    def load_config(self):
-        import yaml
+        def load_config(self):
+            import yaml
 
-        with open("code_tasks/realcodejava/realcodejava_config.yaml") as f:
-            config = yaml.safe_load(f)
+            with open("code_tasks/realcodejava/realcodejava_config.yaml") as f:
+                config = yaml.safe_load(f)
 
-        self.working_dir = os.getenv(
-            "REALCODEJAVA_WORKING_DIR",
-            config["working_dir"])
-        self.run_id = get_run_id()
+            self.working_dir = os.getenv(
+                "REALCODEJAVA_WORKING_DIR",
+                config["working_dir"])
+            self.run_id = get_run_id()
 
-        self.enable_full_logs = os.getenv(
-            "REALCODEJAVA_ENABLE_FULL_LOGS", config["enable_full_logs"]
-        )
-        self.mode = os.getenv(
-            "REALCODEJAVA_SCORING_MODE",
-            config["scoring_mode"])
-        self.n_jobs = os.getenv("REALCODEJAVA_N_JOBS", config["n_jobs"])
-        self.gen_columns = os.getenv(
-            "REALCODEJAVA_GET_COMUNS",
-            config["gen_columns"])
-        self.raise_exception = os.getenv(
-            "REALCODEJAVA_RAISE_EXCEPTION", config["raise_exception"]
-        )
-        self.n_jobs_build = os.getenv(
-            "REALCODEJAVA_N_JOBS_BUILD", config["n_jobs_build"]
-        )
-
-        # Verbose output folder
-        print(
-            "Run_id=%s output folder=%s"
-            % (
-                self.run_id,
-                os.path.abspath(os.path.join(self.working_dir, self.run_id)),
+            self.enable_full_logs = os.getenv(
+                "REALCODEJAVA_ENABLE_FULL_LOGS", config["enable_full_logs"]
             )
-        )
-        self.generations_output_filepath = os.getenv(
-            "REALCODEJAVA_GENERATION_OUTPUT_FILEPATH",
-            config["generations_output_filepath"],
-        )
-        self.metrics_output_filepath = os.getenv(
-            "REALCODEJAVA_METRICS_OUTPUT_FILEPATH",
-            config["metrics_output_filepath"])
-        self.html_output_filepath = os.getenv(
-            "REALCODEJAVA_HTML_OUTPUT_FILEPATH", config["html_output_filepath"]
-        )
-
-    def load(self):
-        if self.enable_full_logs:
-            enable_stdout_logs()
-        else:
-            disable_stdout_logs()
-
-        self.pipeline = JavaEvaluatorRealcode(
-            mode=self.mode,
-            n_jobs=self.n_jobs,
-            gen_columns=self.gen_columns,
-            raise_exception=self.raise_exception,
-            n_jobs_build=self.n_jobs_build,
-        )
-
-    def apply(
-        self,
-        resps: List[List[str]],
-        docs: List[Dict[str, Any]],
-        predict_only: bool = False,
-    ) -> List[List[Dict[str, Any]]]:
-        """
-        Process generations and run scoring.
-
-        resps -> generation -> task_list --[eval inplace]-> task_list
-        Parameters
-        ----------
-        resps : list of list of str
-            Model responses.
-        docs : list of dict
-            Original document data.
-
-        Returns
-        -------
-        list of list of dict
-            Evaluation results per task.
-
-
-        """
-        if predict_only:
-            return resps
-        self.load_config()
-        self.load()
-        generations = [[gen[0]] for gen in resps]
-        self._save_to_file(self.generations_output_filepath, generations)
-        self._save_to_file(
-            os.path.join(
-                self.working_dir,
-                self.run_id,
-                "generations.json"),
-            generations)
-
-        dataset = self._load_dataset(docs)[: len(generations)]
-        # processed_gens = [
-        #     [cut_c_style_func_body(gen, task.left_context) for gen in gens]
-        #     for task, gens in zip(dataset, generations)
-        # ]
-
-        task_list = []
-        for task, gens in zip(dataset, generations):
-            task_list.append(
-                {
-                    **asdict(task),
-                    "gen": gens[0],
-                    "gt": task.gt,
-                    "stub": task.stub,
-                }
+            self.mode = os.getenv(
+                "REALCODEJAVA_SCORING_MODE",
+                config["scoring_mode"])
+            self.n_jobs = os.getenv("REALCODEJAVA_N_JOBS", config["n_jobs"])
+            self.gen_columns = os.getenv(
+                "REALCODEJAVA_GET_COMUNS",
+                config["gen_columns"])
+            self.raise_exception = os.getenv(
+                "REALCODEJAVA_RAISE_EXCEPTION", config["raise_exception"]
             )
-        self.pipeline.inplace_build_and_eval(task_list)
+            self.n_jobs_build = os.getenv(
+                "REALCODEJAVA_N_JOBS_BUILD", config["n_jobs_build"]
+            )
 
-        # Save artifacts after generations
-        self._save_to_file(
-            os.path.join(
-                self.working_dir,
-                self.run_id,
-                "task_list.json"),
-            task_list)
+            # Verbose output folder
+            print(
+                "Run_id=%s output folder=%s"
+                % (
+                    self.run_id,
+                    os.path.abspath(os.path.join(self.working_dir, self.run_id)),
+                )
+            )
+            self.generations_output_filepath = os.getenv(
+                "REALCODEJAVA_GENERATION_OUTPUT_FILEPATH",
+                config["generations_output_filepath"],
+            )
+            self.metrics_output_filepath = os.getenv(
+                "REALCODEJAVA_METRICS_OUTPUT_FILEPATH",
+                config["metrics_output_filepath"])
+            self.html_output_filepath = os.getenv(
+                "REALCODEJAVA_HTML_OUTPUT_FILEPATH", config["html_output_filepath"]
+            )
 
-        return [[i] for i in task_list]
+        def load(self):
+            if self.enable_full_logs:
+                enable_stdout_logs()
+            else:
+                disable_stdout_logs()
 
-    @staticmethod
-    def _save_to_file(filepath: str, data: Any) -> None:
-        """
-        Save data to a JSON file.
+            self.pipeline = JavaEvaluatorRealcode(
+                mode=self.mode,
+                n_jobs=self.n_jobs,
+                gen_columns=self.gen_columns,
+                raise_exception=self.raise_exception,
+                n_jobs_build=self.n_jobs_build,
+            )
 
-        Parameters
-        ----------
-        filepath : str
-            File path.
-        data : any
-            Data to serialize.
-        """
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, "w") as file:
-            json.dump(data, file)
+        def apply(
+            self,
+            resps: List[List[str]],
+            docs: List[Dict[str, Any]],
+            predict_only: bool = False,
+        ) -> List[List[Dict[str, Any]]]:
+            """
+            Process generations and run scoring.
 
-    def _load_dataset(self, docs: List[Dict[str, Any]]) -> List[Task]:
-        """
-        Convert document list to Task instances.
+            resps -> generation -> task_list --[eval inplace]-> task_list
+            Parameters
+            ----------
+            resps : list of list of str
+                Model responses.
+            docs : list of dict
+                Original document data.
 
-        Parameters
-        ----------
-        docs : list of dict
-            List of document dictionaries.
+            Returns
+            -------
+            list of list of dict
+                Evaluation results per task.
 
-        Returns
-        -------
-        list of Task
-        """
-        return [Task(**doc["meta"]) for doc in docs]
+
+            """
+            if predict_only:
+                return resps
+            self.load_config()
+            self.load()
+            generations = [[gen[0]] for gen in resps]
+            self._save_to_file(self.generations_output_filepath, generations)
+            self._save_to_file(
+                os.path.join(
+                    self.working_dir,
+                    self.run_id,
+                    "generations.json"),
+                generations)
+
+            dataset = self._load_dataset(docs)[: len(generations)]
+            # processed_gens = [
+            #     [cut_c_style_func_body(gen, task.left_context) for gen in gens]
+            #     for task, gens in zip(dataset, generations)
+            # ]
+
+            task_list = []
+            for task, gens in zip(dataset, generations):
+                task_list.append(
+                    {
+                        **asdict(task),
+                        "gen": gens[0],
+                        "gt": task.gt,
+                        "stub": task.stub,
+                    }
+                )
+            self.pipeline.inplace_build_and_eval(task_list)
+
+            # Save artifacts after generations
+            self._save_to_file(
+                os.path.join(
+                    self.working_dir,
+                    self.run_id,
+                    "task_list.json"),
+                task_list)
+
+            return [[i] for i in task_list]
+
+        @staticmethod
+        def _save_to_file(filepath: str, data: Any) -> None:
+            """
+            Save data to a JSON file.
+
+            Parameters
+            ----------
+            filepath : str
+                File path.
+            data : any
+                Data to serialize.
+            """
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            with open(filepath, "w") as file:
+                json.dump(data, file)
+
+        def _load_dataset(self, docs: List[Dict[str, Any]]) -> List[Task]:
+            """
+            Convert document list to Task instances.
+
+            Parameters
+            ----------
+            docs : list of dict
+                List of document dictionaries.
+
+            Returns
+            -------
+            list of Task
+            """
+            return [Task(**doc["meta"]) for doc in docs]
 
 
 def process_results_realcode_java(
@@ -406,72 +409,73 @@ def sum_metric(values: List[float]) -> float:
     return sum(values)
 
 
-@register_filter("javafix")
-class JavaLMEvalAngel(Filter):
-    DISABLE_ON_PREDICT_ONLY = True
+if not FILTER_REGISTRY.get("javafix", None):
+    @register_filter("javafix")
+    class JavaLMEvalAngel(Filter):
+        DISABLE_ON_PREDICT_ONLY = True
 
-    def apply(self,
-              resps: list[list[str]],
-              docs: list[dict],
-              predict_only: bool = False) -> list[list[str]]:
-        if predict_only:
-            return resps
-        fixed = []
-        for gens, doc in zip(resps, docs):
-            intent = doc["meta"]["intent"]
-            gt = doc["meta"]["gt"]
-            left_context = doc["meta"]["left_context"]
-            fixed_gens = []
-            for gen in gens:
-                gen = remove_signature(gen, left_context, intent)
-                gen = fix_missing_closing_brace(gen, gt)
-                gen = cut_c_style_func_body_v2(gen, c=1)
-                fixed_gens.append(gen)
-            fixed.append(fixed_gens)
-        return fixed
+        def apply(self,
+                resps: list[list[str]],
+                docs: list[dict],
+                predict_only: bool = False) -> list[list[str]]:
+            if predict_only:
+                return resps
+            fixed = []
+            for gens, doc in zip(resps, docs):
+                intent = doc["meta"]["intent"]
+                gt = doc["meta"]["gt"]
+                left_context = doc["meta"]["left_context"]
+                fixed_gens = []
+                for gen in gens:
+                    gen = remove_signature(gen, left_context, intent)
+                    gen = fix_missing_closing_brace(gen, gt)
+                    gen = cut_c_style_func_body_v2(gen, c=1)
+                    fixed_gens.append(gen)
+                fixed.append(fixed_gens)
+            return fixed
 
 
-def find_code_block_braces(snippet: str) -> List[Tuple[str, int]]:
-    code_braces = []
-    is_char = False
-    inside_string = False
-    inside_short_comment = False
-    inside_multi_line_comment = False
-    for i, char in enumerate(snippet):
-        two_chars = snippet[max(0, i - 1): i + 1]
-        if char == '"' and two_chars != r"\"":
-            inside_string = not inside_string
-        if (
-            char == "'"
-            and two_chars != r"\'"
-            and not inside_string
-            and not inside_short_comment
-            and not inside_multi_line_comment
-        ):
-            is_char = not is_char
+    def find_code_block_braces(snippet: str) -> List[Tuple[str, int]]:
+        code_braces = []
+        is_char = False
+        inside_string = False
+        inside_short_comment = False
+        inside_multi_line_comment = False
+        for i, char in enumerate(snippet):
+            two_chars = snippet[max(0, i - 1): i + 1]
+            if char == '"' and two_chars != r"\"":
+                inside_string = not inside_string
+            if (
+                char == "'"
+                and two_chars != r"\'"
+                and not inside_string
+                and not inside_short_comment
+                and not inside_multi_line_comment
+            ):
+                is_char = not is_char
 
-        if two_chars == "//":
-            inside_short_comment = True
-        elif two_chars == "/*":
-            inside_multi_line_comment = True
-        elif two_chars == "*/":
-            inside_multi_line_comment = False
-        if char == "\n":
-            inside_short_comment = False
+            if two_chars == "//":
+                inside_short_comment = True
+            elif two_chars == "/*":
+                inside_multi_line_comment = True
+            elif two_chars == "*/":
+                inside_multi_line_comment = False
+            if char == "\n":
+                inside_short_comment = False
 
-        if (
-            is_char
-            or inside_string
-            or inside_short_comment
-            or inside_multi_line_comment
-        ):
-            # На такие случаи лучше убедиться, что is_char выключится точно
-            # ", email='" + email + '\'' +
-            # is_char = False
-            continue
-        if char in "{}":
-            code_braces.append((char, i))
-    return code_braces
+            if (
+                is_char
+                or inside_string
+                or inside_short_comment
+                or inside_multi_line_comment
+            ):
+                # На такие случаи лучше убедиться, что is_char выключится точно
+                # ", email='" + email + '\'' +
+                # is_char = False
+                continue
+            if char in "{}":
+                code_braces.append((char, i))
+        return code_braces
 
 
 def count_open_curly_braces(snippet: str) -> int:

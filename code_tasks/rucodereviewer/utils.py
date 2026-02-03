@@ -9,6 +9,7 @@ from typing import Any, Dict
 import sacrebleu
 from lm_eval.api.filter import Filter
 from lm_eval.api.registry import register_filter
+from lm_eval.api.registry import FILTER_REGISTRY
 
 try:
     import httpx
@@ -162,44 +163,45 @@ class llmAsAJudge:
         return labels
 
 
-@register_filter("llmasajudgescoring")
-class llmASaJudgeScoring(Filter):
-    DISABLE_ON_PREDICT_ONLY = True
+if not FILTER_REGISTRY.get("llmasajudgescoring", None):
+    @register_filter("llmasajudgescoring")
+    class llmASaJudgeScoring(Filter):
+        DISABLE_ON_PREDICT_ONLY = True
 
-    def __init__(self) -> None:
-        self.judge = llmAsAJudge()
+        def __init__(self) -> None:
+            self.judge = llmAsAJudge()
 
-    def process_sample(
-        self, idx: int, sample: str, doc: Dict[str, Any]
-    ) -> Dict[str, float]:
-        labels = self.judge.calculate(doc, sample)
-        sample_metrics = compute_classic_metrics(doc["outputs"], sample)
+        def process_sample(
+            self, idx: int, sample: str, doc: Dict[str, Any]
+        ) -> Dict[str, float]:
+            labels = self.judge.calculate(doc, sample)
+            sample_metrics = compute_classic_metrics(doc["outputs"], sample)
 
-        for k in [1, 5, n]:
-            sample_metrics[f"pass@{k}"] = float(sum(labels[:k]) > 0)
+            for k in [1, 5, n]:
+                sample_metrics[f"pass@{k}"] = float(sum(labels[:k]) > 0)
 
-        return sample_metrics
+            return sample_metrics
 
-    def apply(
-        self,
-        resps: list[list[str]],
-        docs: list[Dict[str, Any]],
-        predict_only: bool = False,
-    ) -> list[Dict[str, float]]:
-        if predict_only:
-            return resps
-        self.judge.load_config()
-        self.judge.load_data()
-        with ThreadPoolExecutor(os.getenv("JUDGE_MAX_WORKERS", 50)) as executor:
-            tasks = [
-                (idx, sample[0], doc)
-                for idx, (sample, doc) in enumerate(zip(resps, docs))
-            ]
-            results = list(
-                executor.map(
-                    lambda x: self.process_sample(
-                        *x), tasks))
-        return results
+        def apply(
+            self,
+            resps: list[list[str]],
+            docs: list[Dict[str, Any]],
+            predict_only: bool = False,
+        ) -> list[Dict[str, float]]:
+            if predict_only:
+                return resps
+            self.judge.load_config()
+            self.judge.load_data()
+            with ThreadPoolExecutor(os.getenv("JUDGE_MAX_WORKERS", 50)) as executor:
+                tasks = [
+                    (idx, sample[0], doc)
+                    for idx, (sample, doc) in enumerate(zip(resps, docs))
+                ]
+                results = list(
+                    executor.map(
+                        lambda x: self.process_sample(
+                            *x), tasks))
+            return results
 
 
 def compute_classic_metrics(answer: str, message: str) -> Dict[str, float]:

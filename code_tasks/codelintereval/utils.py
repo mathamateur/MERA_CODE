@@ -8,6 +8,7 @@ from typing import Dict, List
 import numpy as np
 from lm_eval.api.filter import Filter
 from lm_eval.api.registry import register_filter
+from lm_eval.api.registry import FILTER_REGISTRY
 
 
 def process_results(doc: Dict, results: List[str]) -> Dict[str, float]:
@@ -30,30 +31,31 @@ def process_results(doc: Dict, results: List[str]) -> Dict[str, float]:
     }  # if no label provided (test answers are secret)
 
 
-@register_filter("rucodelinterevalscoring")
-class ruCodeLinterEvalScoring(Filter):
-    DISABLE_ON_PREDICT_ONLY = True
+if not FILTER_REGISTRY.get("rucodelinterevalscoring", None):
+    @register_filter("rucodelinterevalscoring")
+    class ruCodeLinterEvalScoring(Filter):
+        DISABLE_ON_PREDICT_ONLY = True
 
-    def __init__(self) -> None:
-        """
-        Считывание необходимых для фильтра параметров
-        """
+        def __init__(self) -> None:
+            """
+            Считывание необходимых для фильтра параметров
+            """
 
-    def apply(self, resps, docs, predict_only=False):
-        """
-        Метод, который отвечает за применение фильтра
-        """
-        if predict_only:
-            return resps
-        code_results = []
-        for idx, sample in enumerate(resps):
-            sample_metrics = []
-            for completion in sample:
-                processed_completion = preprocess_generation(completion)
-                pass1 = execute_function(processed_completion)
-                sample_metrics.extend([pass1])
-            code_results.extend([sample_metrics])
-        return code_results
+        def apply(self, resps, docs, predict_only=False):
+            """
+            Метод, который отвечает за применение фильтра
+            """
+            if predict_only:
+                return resps
+            code_results = []
+            for idx, sample in enumerate(resps):
+                sample_metrics = []
+                for completion in sample:
+                    processed_completion = preprocess_generation(completion)
+                    pass1 = execute_function(processed_completion)
+                    sample_metrics.extend([pass1])
+                code_results.extend([sample_metrics])
+            return code_results
 
 
 def preprocess_generation(text: str, language: str = "python"):

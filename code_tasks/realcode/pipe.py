@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 
 from lm_eval.api.filter import Filter
 from lm_eval.api.registry import register_filter
+from lm_eval.api.registry import FILTER_REGISTRY
 
 try:
     from repotest import __version__ as repotest_version
@@ -95,68 +96,69 @@ def doc_to_text_fg(doc: Dict[str, Any]) -> str:
     return doc["instruction"].format(**doc["inputs"])
 
 
-@register_filter("extract_from_tag")
-class FromTagExtractor(Filter):
-    DISABLE_ON_PREDICT_ONLY = True
+if not FILTER_REGISTRY.get("extract_from_tag", None):
+    @register_filter("extract_from_tag")
+    class FromTagExtractor(Filter):
+        DISABLE_ON_PREDICT_ONLY = True
 
-    def __init__(self) -> None:
-        super().__init__()
+        def __init__(self) -> None:
+            super().__init__()
 
-    def apply(
-        self, resps: List[List[str]], docs: List[Dict[str, Any]], predict_only=False
-    ) -> List[List[str]]:
-        if predict_only:
-            return resps
-        """
-        Extract code blocks from responses.
+        def apply(
+            self, resps: List[List[str]], docs: List[Dict[str, Any]], predict_only=False
+        ) -> List[List[str]]:
+            if predict_only:
+                return resps
+            """
+            Extract code blocks from responses.
 
-        Parameters
-        ----------
-        resps : list of list of str
-            List of generations per document.
-        docs : list of dict
-            Unused, present for compatibility.
+            Parameters
+            ----------
+            resps : list of list of str
+                List of generations per document.
+            docs : list of dict
+                Unused, present for compatibility.
 
-        Returns
-        -------
-        list of list of str
-            Code blocks extracted from between markdown tags.
-        """
-        code_results = []
-        for sample in resps:
-            sample_metrics = list(map(self._extract_from_tag, sample))
-            code_results.append(sample_metrics)
-        return code_results
+            Returns
+            -------
+            list of list of str
+                Code blocks extracted from between markdown tags.
+            """
+            code_results = []
+            for sample in resps:
+                sample_metrics = list(map(self._extract_from_tag, sample))
+                code_results.append(sample_metrics)
+            return code_results
 
-    def _extract_from_tag(self, text: str) -> str:
-        """
-        Extract text between triple-backtick Python tags.
+        def _extract_from_tag(self, text: str) -> str:
+            """
+            Extract text between triple-backtick Python tags.
 
-        Parameters
-        ----------
-        text : str
-            Full model output text.
+            Parameters
+            ----------
+            text : str
+                Full model output text.
 
-        Returns
-        -------
-        str
-            Extracted code or original text if tags not found.
-        """
-        if text is None:
-            return ""
-        tag_start = "```python"
-        tag_end = "```"
-        index_start = text.find(tag_start)
+            Returns
+            -------
+            str
+                Extracted code or original text if tags not found.
+            """
+            if text is None:
+                return ""
+            tag_start = "```python"
+            tag_end = "```"
+            index_start = text.find(tag_start)
 
-        if index_start == -1:
-            index_end = text.find(tag_end, 0)
-        else:
-            index_end = text.find(tag_end, index_start + len(tag_start))
+            if index_start == -1:
+                index_end = text.find(tag_end, 0)
+            else:
+                index_end = text.find(tag_end, index_start + len(tag_start))
 
-        if index_start == -1 or index_end == -1:
-            return text
+            if index_start == -1 or index_end == -1:
+                return text
 
-        return text[index_start + len(tag_start): index_end]
+            return text[index_start + len(tag_start): index_end]
 
 
 def get_indent(code: str) -> int:
@@ -208,214 +210,215 @@ def get_run_id():
     return datetime.now().strftime("%Y%m%dT%H%M%S")
 
 
-@register_filter("scoring")
-class ScoringFilter(Filter):
-    DISABLE_ON_PREDICT_ONLY = True
+if not FILTER_REGISTRY.get("scoring", None):
+    @register_filter("scoring")
+    class ScoringFilter(Filter):
+        DISABLE_ON_PREDICT_ONLY = True
 
-    def __init__(
-        self,
-    ) -> None:
-        """
-        Initializes the scoring filter with configuration for dataset, paths and logging.
-        """
-        super().__init__()
+        def __init__(
+            self,
+        ) -> None:
+            """
+            Initializes the scoring filter with configuration for dataset, paths and logging.
+            """
+            super().__init__()
 
-    def load_config(self):
-        import yaml
+        def load_config(self):
+            import yaml
 
-        with open("code_tasks/realcode/realcode_config.yaml") as f:
-            config = yaml.safe_load(f)
+            with open("code_tasks/realcode/realcode_config.yaml") as f:
+                config = yaml.safe_load(f)
 
-        self.working_dir = os.getenv(
-            "REALCODE_WORKING_DIR",
-            config["working_dir"])
-        self.run_id = get_run_id()
+            self.working_dir = os.getenv(
+                "REALCODE_WORKING_DIR",
+                config["working_dir"])
+            self.run_id = get_run_id()
 
-        self.enable_full_logs = os.getenv(
-            "REALCODE_ENABLE_FULL_LOGS", config["enable_full_logs"]
-        )
-        self.mode = os.getenv("REALCODE_SCORING_MODE", config["scoring_mode"])
-        self.n_jobs = os.getenv("REALCODE_N_JOBS", config["n_jobs"])
-        self.gen_columns = os.getenv(
-            "REALCODE_GET_COMUNS",
-            config["gen_columns"])
-        self.raise_exception = os.getenv(
-            "REALCODE_RAISE_EXCEPTION", config["raise_exception"]
-        )
-        self.n_jobs_build = os.getenv(
-            "REALCODE_N_JOBS_BUILD",
-            config["n_jobs_build"])
-
-        # Verbose output folder
-        print(
-            "Run_id=%s output folder=%s"
-            % (
-                self.run_id,
-                os.path.abspath(os.path.join(self.working_dir, self.run_id)),
+            self.enable_full_logs = os.getenv(
+                "REALCODE_ENABLE_FULL_LOGS", config["enable_full_logs"]
             )
-        )
-        self.generations_output_filepath = os.getenv(
-            "REALCODE_GENERATION_OUTPUT_FILEPATH",
-            config["generations_output_filepath"])
-        self.metrics_output_filepath = os.getenv(
-            "REALCODE_METRICS_OUTPUT_FILEPATH",
-            config["metrics_output_filepath"])
-        self.html_output_filepath = os.getenv(
-            "REALCODE_HTML_OUTPUT_FILEPATH", config["html_output_filepath"]
-        )
+            self.mode = os.getenv("REALCODE_SCORING_MODE", config["scoring_mode"])
+            self.n_jobs = os.getenv("REALCODE_N_JOBS", config["n_jobs"])
+            self.gen_columns = os.getenv(
+                "REALCODE_GET_COMUNS",
+                config["gen_columns"])
+            self.raise_exception = os.getenv(
+                "REALCODE_RAISE_EXCEPTION", config["raise_exception"]
+            )
+            self.n_jobs_build = os.getenv(
+                "REALCODE_N_JOBS_BUILD",
+                config["n_jobs_build"])
 
-    def load(self):
-        if self.enable_full_logs:
-            enable_stdout_logs()
-        else:
-            disable_stdout_logs()
-
-        self.manager = TaskManagerRealcode(
-            mode=self.mode,
-            n_jobs=self.n_jobs,
-            gen_columns=self.gen_columns,
-            raise_exception=self.raise_exception,
-            n_jobs_build=self.n_jobs_build,
-        )
-
-    def _generate_empty_string_code(self, gt: str) -> str:
-        return " " * get_indent(gt) + "pass"
-
-    def _generate_pass_code(self, gt: str) -> str:
-        return " " * get_indent(gt) + 'return ""'
-
-    def apply(
-        self,
-        resps: List[List[str]],
-        docs: List[Dict[str, Any]],
-        predict_only: bool = False,
-    ) -> List[List[Dict[str, Any]]]:
-        """
-        Process generations and run scoring.
-
-        resps -> generation -> task_list --[eval inplace]-> task_list
-        Parameters
-        ----------
-        resps : list of list of str
-            Model responses.
-        docs : list of dict
-            Original document data.
-
-        Returns
-        -------
-        list of list of dict
-            Evaluation results per task.
-
-
-        """
-        if predict_only:
-            return resps
-        self.load_config()
-        self.load()
-        generations = [[gen[0]] for gen in resps]
-        self._save_to_file(self.generations_output_filepath, generations)
-        self._save_to_file(
-            os.path.join(
-                self.working_dir,
-                self.run_id,
-                "generations.json"),
-            generations)
-
-        dataset = self._load_dataset(docs)[: len(generations)]
-        processed_gens = [
-            [_postprocess(gen, get_indent(task.gt)) for gen in gens]
-            for task, gens in zip(dataset, generations)
-        ]
-
-        task_list = []
-        for task, gen in zip(dataset, processed_gens):
-            task_list.append(
-                {
-                    **asdict(task),
-                    "gen": gen[0],
-                    "gt": task.gt,
-                    "return_pass": self._generate_empty_string_code(task.gt),
-                    "return_empty_str": self._generate_pass_code(task.gt),
-                }
+            # Verbose output folder
+            print(
+                "Run_id=%s output folder=%s"
+                % (
+                    self.run_id,
+                    os.path.abspath(os.path.join(self.working_dir, self.run_id)),
+                )
+            )
+            self.generations_output_filepath = os.getenv(
+                "REALCODE_GENERATION_OUTPUT_FILEPATH",
+                config["generations_output_filepath"])
+            self.metrics_output_filepath = os.getenv(
+                "REALCODE_METRICS_OUTPUT_FILEPATH",
+                config["metrics_output_filepath"])
+            self.html_output_filepath = os.getenv(
+                "REALCODE_HTML_OUTPUT_FILEPATH", config["html_output_filepath"]
             )
 
-        self.manager.inplace_build_and_eval(task_list)
+        def load(self):
+            if self.enable_full_logs:
+                enable_stdout_logs()
+            else:
+                disable_stdout_logs()
 
-        # Save artifacts after generations
-        self._save_to_file(
-            os.path.join(
-                self.working_dir,
-                self.run_id,
-                "task_list.json"),
-            task_list)
-
-        # Save html vizualization
-        self.create_vizualization(task_list, self.html_output_filepath)
-        self.create_vizualization(
-            task_list,
-            os.path.join(
-                self.working_dir,
-                self.run_id,
-                "task_list.html"))
-
-        return [[i] for i in task_list]
-
-    @staticmethod
-    def create_vizualization(
-        task_list: List[Dict[str, Any]], fn_html_output_filepath: str
-    ) -> None:
-        """
-        Create an HTML visualization of tasks.
-
-        Parameters
-        ----------
-        task_list : list of dict
-            List of task records to visualize.
-        fn_html_output_filepath : str
-            Output HTML file path.
-        """
-        with tempfile.NamedTemporaryFile(
-            mode="w+", delete=True, suffix=".jsonl"
-        ) as tmpfile:
-            for task in task_list:
-                tmpfile.write(json.dumps(task) + "\n")
-            convert_jsonl_to_html(
-                fn_input=tmpfile.name,
-                index_column="auto",
-                fn_output=fn_html_output_filepath,
-                additional_table_content={"content": "value"},
+            self.manager = TaskManagerRealcode(
+                mode=self.mode,
+                n_jobs=self.n_jobs,
+                gen_columns=self.gen_columns,
+                raise_exception=self.raise_exception,
+                n_jobs_build=self.n_jobs_build,
             )
 
-    @staticmethod
-    def _save_to_file(filepath: str, data: Any) -> None:
-        """
-        Save data to a JSON file.
+        def _generate_empty_string_code(self, gt: str) -> str:
+            return " " * get_indent(gt) + "pass"
 
-        Parameters
-        ----------
-        filepath : str
-            File path.
-        data : any
-            Data to serialize.
-        """
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, "w") as file:
-            json.dump(data, file)
+        def _generate_pass_code(self, gt: str) -> str:
+            return " " * get_indent(gt) + 'return ""'
 
-    def _load_dataset(self, docs: List[Dict[str, Any]]) -> List[Task]:
-        """
-        Convert document list to Task instances.
+        def apply(
+            self,
+            resps: List[List[str]],
+            docs: List[Dict[str, Any]],
+            predict_only: bool = False,
+        ) -> List[List[Dict[str, Any]]]:
+            """
+            Process generations and run scoring.
 
-        Parameters
-        ----------
-        docs : list of dict
-            List of document dictionaries.
+            resps -> generation -> task_list --[eval inplace]-> task_list
+            Parameters
+            ----------
+            resps : list of list of str
+                Model responses.
+            docs : list of dict
+                Original document data.
 
-        Returns
-        -------
-        list of Task
-        """
-        return [Task(**doc["meta"]) for doc in docs]
+            Returns
+            -------
+            list of list of dict
+                Evaluation results per task.
+
+
+            """
+            if predict_only:
+                return resps
+            self.load_config()
+            self.load()
+            generations = [[gen[0]] for gen in resps]
+            self._save_to_file(self.generations_output_filepath, generations)
+            self._save_to_file(
+                os.path.join(
+                    self.working_dir,
+                    self.run_id,
+                    "generations.json"),
+                generations)
+
+            dataset = self._load_dataset(docs)[: len(generations)]
+            processed_gens = [
+                [_postprocess(gen, get_indent(task.gt)) for gen in gens]
+                for task, gens in zip(dataset, generations)
+            ]
+
+            task_list = []
+            for task, gen in zip(dataset, processed_gens):
+                task_list.append(
+                    {
+                        **asdict(task),
+                        "gen": gen[0],
+                        "gt": task.gt,
+                        "return_pass": self._generate_empty_string_code(task.gt),
+                        "return_empty_str": self._generate_pass_code(task.gt),
+                    }
+                )
+
+            self.manager.inplace_build_and_eval(task_list)
+
+            # Save artifacts after generations
+            self._save_to_file(
+                os.path.join(
+                    self.working_dir,
+                    self.run_id,
+                    "task_list.json"),
+                task_list)
+
+            # Save html vizualization
+            self.create_vizualization(task_list, self.html_output_filepath)
+            self.create_vizualization(
+                task_list,
+                os.path.join(
+                    self.working_dir,
+                    self.run_id,
+                    "task_list.html"))
+
+            return [[i] for i in task_list]
+
+        @staticmethod
+        def create_vizualization(
+            task_list: List[Dict[str, Any]], fn_html_output_filepath: str
+        ) -> None:
+            """
+            Create an HTML visualization of tasks.
+
+            Parameters
+            ----------
+            task_list : list of dict
+                List of task records to visualize.
+            fn_html_output_filepath : str
+                Output HTML file path.
+            """
+            with tempfile.NamedTemporaryFile(
+                mode="w+", delete=True, suffix=".jsonl"
+            ) as tmpfile:
+                for task in task_list:
+                    tmpfile.write(json.dumps(task) + "\n")
+                convert_jsonl_to_html(
+                    fn_input=tmpfile.name,
+                    index_column="auto",
+                    fn_output=fn_html_output_filepath,
+                    additional_table_content={"content": "value"},
+                )
+
+        @staticmethod
+        def _save_to_file(filepath: str, data: Any) -> None:
+            """
+            Save data to a JSON file.
+
+            Parameters
+            ----------
+            filepath : str
+                File path.
+            data : any
+                Data to serialize.
+            """
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            with open(filepath, "w") as file:
+                json.dump(data, file)
+
+        def _load_dataset(self, docs: List[Dict[str, Any]]) -> List[Task]:
+            """
+            Convert document list to Task instances.
+
+            Parameters
+            ----------
+            docs : list of dict
+                List of document dictionaries.
+
+            Returns
+            -------
+            list of Task
+            """
+            return [Task(**doc["meta"]) for doc in docs]
 
 
 def process_results(
@@ -469,50 +472,51 @@ def sum_metric(values: List[float]) -> float:
     return sum(values)
 
 
-@register_filter("autofix")
-class LMEvalAutoFixerFilter(Filter):
-    DISABLE_ON_PREDICT_ONLY = True
+if not FILTER_REGISTRY.get("autofix", None):
+    @register_filter("autofix")
+    class LMEvalAutoFixerFilter(Filter):
+        DISABLE_ON_PREDICT_ONLY = True
 
-    def __init__(
-        self,
-    ):
-        super().__init__()
+        def __init__(
+            self,
+        ):
+            super().__init__()
 
-    def load_config(self):
-        import yaml
+        def load_config(self):
+            import yaml
 
-        with open("code_tasks/realcode/realcode_config.yaml") as f:
-            config = yaml.safe_load(f)
+            with open("code_tasks/realcode/realcode_config.yaml") as f:
+                config = yaml.safe_load(f)
 
-        self.mode = os.getenv("REALCODE_AUTOFIX_MODE", config["autofix_mode"])
+            self.mode = os.getenv("REALCODE_AUTOFIX_MODE", config["autofix_mode"])
 
-    def apply(self,
-              resps: list[list[str]],
-              docs: list[dict],
-              predict_only: bool = False) -> list[list[str]]:
-        if predict_only:
-            return resps
-        self.load_config()
-        fixed = []
-        for gens, doc in zip(resps, docs):
-            intent = doc["meta"]["intent"]
-            gt = doc["meta"]["gt"]
-            left_context = doc["meta"]["left_context"]
-            if self.mode == "simple":
-                fixed_gens = [fix_all(gen, intent, gt) for gen in gens]
-            elif self.mode == "suffix":
-                sig = extract_signature_by_intent(left_context, intent)
-                fixed_gens = [
-                    fix_all(
-                        remove_suffix(
-                            gen,
-                            sig),
-                        intent,
-                        gt) for gen in gens]
-            else:
-                fixed_gens = gens
-            fixed.append(fixed_gens)
-        return fixed
+        def apply(self,
+                resps: list[list[str]],
+                docs: list[dict],
+                predict_only: bool = False) -> list[list[str]]:
+            if predict_only:
+                return resps
+            self.load_config()
+            fixed = []
+            for gens, doc in zip(resps, docs):
+                intent = doc["meta"]["intent"]
+                gt = doc["meta"]["gt"]
+                left_context = doc["meta"]["left_context"]
+                if self.mode == "simple":
+                    fixed_gens = [fix_all(gen, intent, gt) for gen in gens]
+                elif self.mode == "suffix":
+                    sig = extract_signature_by_intent(left_context, intent)
+                    fixed_gens = [
+                        fix_all(
+                            remove_suffix(
+                                gen,
+                                sig),
+                            intent,
+                            gt) for gen in gens]
+                else:
+                    fixed_gens = gens
+                fixed.append(fixed_gens)
+            return fixed
 
 
 def cut_before_signature(code: str, intent: str) -> str:

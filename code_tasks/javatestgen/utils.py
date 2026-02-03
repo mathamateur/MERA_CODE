@@ -6,6 +6,8 @@ from typing import Any, Dict, List
 
 from lm_eval.api.filter import Filter
 from lm_eval.api.registry import register_filter
+from lm_eval.api.registry import FILTER_REGISTRY
+
 
 sys.path.append("code_tasks/javatestgen/")
 from logger import setup_logger
@@ -104,103 +106,105 @@ def evaluate(
     return result
 
 
-@register_filter("extract_from_tag_java")
-class ExtractFromTagJava(Filter):
-    DISABLE_ON_PREDICT_ONLY = True
+if not FILTER_REGISTRY.get("extract_from_tag_java", None):
+    @register_filter("extract_from_tag_java")
+    class ExtractFromTagJava(Filter):
+        DISABLE_ON_PREDICT_ONLY = True
 
-    def apply(self, resps, docs, predict_only=False):
-        if predict_only:
-            return resps
-        return [[self._extract_java(gen) for gen in generations]
-                for generations in resps]
+        def apply(self, resps, docs, predict_only=False):
+            if predict_only:
+                return resps
+            return [[self._extract_java(gen) for gen in generations]
+                    for generations in resps]
 
-    @staticmethod
-    def _extract_java(text):
-        if "```java" in text:
-            text = text.split("```java")[1]
-        if "```" in text:
-            text = text.split("```")[0]
-        return text.strip()
+        @staticmethod
+        def _extract_java(text):
+            if "```java" in text:
+                text = text.split("```java")[1]
+            if "```" in text:
+                text = text.split("```")[0]
+            return text.strip()
 
 
-@register_filter("scoring_java_testgen")
-class ScoringJavaTestgen(Filter):
-    DISABLE_ON_PREDICT_ONLY = True
+if not FILTER_REGISTRY.get("scoring_java_testgen", None):
+    @register_filter("scoring_java_testgen")
+    class ScoringJavaTestgen(Filter):
+        DISABLE_ON_PREDICT_ONLY = True
 
-    def __init__(
-        self,
-    ) -> None:
-        super().__init__()
+        def __init__(
+            self,
+        ) -> None:
+            super().__init__()
 
-    def load_config(self):
-        import yaml
+        def load_config(self):
+            import yaml
 
-        with open("code_tasks/javatestgen/javatestgen_config.yaml") as f:
-            config = yaml.safe_load(f)
+            with open("code_tasks/javatestgen/javatestgen_config.yaml") as f:
+                config = yaml.safe_load(f)
 
-        self.working_dir = os.getenv(
-            "JAVATESTGEN_WORKING_DIR",
-            config["working_dir"])
-        self.generations_output_filepath = os.getenv(
-            "JAVATESTGEN_GENERATION_OUTPUT_FILEPATH",
-            config["generations_output_filepath"],
-        )
-        self.metrics_output_filepath = os.getenv(
-            "JAVATESTGEN_METRICS_OUTPUT_FILEPATH",
-            config["metrics_output_filepath"])
-        os.makedirs(self.working_dir, exist_ok=True)
-
-    def apply(self, resps, docs, predict_only=False):
-        if predict_only:
-            return resps
-        self.load_config()
-        generations = [[gen[0]] for gen in resps]
-        self._save_to_file(self.generations_output_filepath, generations)
-
-        results = []
-        for doc, gen in zip(docs, generations):
-            code = gen[0]
-            result = self._evaluate(doc, code)
-            results.append(result)
-
-        self._save_to_file(self.metrics_output_filepath, results)
-        return [[{"evaluation": res}] for res in results]
-
-    def _evaluate(self, doc, code):
-        meta = doc["meta"]
-        if code.strip():
-            result = evaluate(
-                repo=meta["repo"],
-                base_commit=meta["base_commit"],
-                image_name=meta["image_name"],
-                fn_test=meta["fn_test"],
-                test_command=meta["test_command"],
-                source_code=meta["source_code"],
-                code=code,
+            self.working_dir = os.getenv(
+                "JAVATESTGEN_WORKING_DIR",
+                config["working_dir"])
+            self.generations_output_filepath = os.getenv(
+                "JAVATESTGEN_GENERATION_OUTPUT_FILEPATH",
+                config["generations_output_filepath"],
             )
-        else:
-            result = {
-                "stdout": "",
-                "stderr": "empty code",
-                "std": "empty code",
-                "returncode": -2,
-                "parser": {"success": False, "compiled": False},
-                "time": 0.01,
-            }
-        return result
+            self.metrics_output_filepath = os.getenv(
+                "JAVATESTGEN_METRICS_OUTPUT_FILEPATH",
+                config["metrics_output_filepath"])
+            os.makedirs(self.working_dir, exist_ok=True)
 
-    @staticmethod
-    def _save_to_file(filepath, data):
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        def apply(self, resps, docs, predict_only=False):
+            if predict_only:
+                return resps
+            self.load_config()
+            generations = [[gen[0]] for gen in resps]
+            self._save_to_file(self.generations_output_filepath, generations)
 
-        def convert_bytes(obj):
-            if isinstance(obj, bytes):
-                return obj.decode("utf-8", errors="ignore")
-            if isinstance(obj, dict):
-                return {k: convert_bytes(v) for k, v in obj.items()}
-            if isinstance(obj, list):
-                return [convert_bytes(i) for i in obj]
-            return obj
+            results = []
+            for doc, gen in zip(docs, generations):
+                code = gen[0]
+                result = self._evaluate(doc, code)
+                results.append(result)
 
-        with open(filepath, "w") as file:
-            json.dump(convert_bytes(data), file, indent=4)
+            self._save_to_file(self.metrics_output_filepath, results)
+            return [[{"evaluation": res}] for res in results]
+
+        def _evaluate(self, doc, code):
+            meta = doc["meta"]
+            if code.strip():
+                result = evaluate(
+                    repo=meta["repo"],
+                    base_commit=meta["base_commit"],
+                    image_name=meta["image_name"],
+                    fn_test=meta["fn_test"],
+                    test_command=meta["test_command"],
+                    source_code=meta["source_code"],
+                    code=code,
+                )
+            else:
+                result = {
+                    "stdout": "",
+                    "stderr": "empty code",
+                    "std": "empty code",
+                    "returncode": -2,
+                    "parser": {"success": False, "compiled": False},
+                    "time": 0.01,
+                }
+            return result
+
+        @staticmethod
+        def _save_to_file(filepath, data):
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+            def convert_bytes(obj):
+                if isinstance(obj, bytes):
+                    return obj.decode("utf-8", errors="ignore")
+                if isinstance(obj, dict):
+                    return {k: convert_bytes(v) for k, v in obj.items()}
+                if isinstance(obj, list):
+                    return [convert_bytes(i) for i in obj]
+                return obj
+
+            with open(filepath, "w") as file:
+                json.dump(convert_bytes(data), file, indent=4)
