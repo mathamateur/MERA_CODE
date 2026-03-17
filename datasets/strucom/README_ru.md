@@ -13,8 +13,6 @@
 
 Тестируемые навыки моделей: Instruction Following, Code Perception, Simulation, Documentation
 
-Авторы: Мария Дзюба, Валентин Малых
-
 
 ## Мотивация
 
