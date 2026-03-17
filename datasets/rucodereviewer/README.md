@@ -8,9 +8,6 @@ The dataset includes `689` examples of code changes (in Java, Python, Scala, and
 
 Evaluated skills: Instruction Following, Code Perception, Review, Simulation, Explanation, Programming Patters, Style Guides
 
-Contributors: Artem Zavgorodnev, Aleksandr Medvedev, Georgiy Mkrtchyan, Ivan Kharkevich, Ilseyar Alimova, Nikolay Bushkov, Stanislav Moiseev.
-
-
 ## Motivation
 
 This benchmark addresses a critical gap in evaluating multilingual code-aware LLMs. Below is a detailed rationale:
