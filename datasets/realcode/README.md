@@ -7,9 +7,6 @@
 
 Evaluated skills: Instruction Following, Code Perception, Completion
 
-Contributors: Pavel Zadorozhny, Rodion Levichev, Pavel Adamenko, Aidar Valeev, Dmitrii Babaev, Denis Kokosinskiy
-
-
 ## Motivation
 
 This dataset tests how well models can:
