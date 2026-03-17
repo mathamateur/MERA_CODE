@@ -39,11 +39,6 @@ pip install flake8 flake8-json
 - canonical_code — каноническое решение задачи (код без ошибок/предупреждений линтера);
 - id - идентификатор задания;
 
-
-## Homepage
-
-https://mera.a-ai.ru
-
 ## License
 
 MIT License
