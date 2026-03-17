@@ -1,7 +1,7 @@
 task: rucodereviewer
 task_alias: rucodereviewer
 
-dataset_path: MERA-evaluation/ruCodeReviewer
+dataset_path: dataset_path
 
 output_type: generate_until
 
