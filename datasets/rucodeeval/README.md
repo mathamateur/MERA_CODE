@@ -9,8 +9,6 @@ This set is a private analogue of ruHumanEval.
 
 Evaluated skills: Instruction Following, Code Perception, Completion, Algorithms & Data Structures
 
-Contributors: Artem Chervyakov, Albina Akhmetgareeva, Katerina Kolomeytseva, Anastasia Kozlova, Alena Fenogenova
-
 ### Motivation
 
 This task tests the ability of models to generate simple Python programs based on a description (condition) in natural language. Since large models have in their training corpus a proportion of texts (programs) written in various programming languages, they are assumed to have the ability to understand and write code for simple tasks.
