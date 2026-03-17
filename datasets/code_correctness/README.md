@@ -7,9 +7,6 @@ Evaluation of the correctness of the written code for Python, Java and Go. Corre
 
 Evaluated skills: Instruction Following, Code Perception, Simulation, Error Classification
 
-Contributors: Elena Bruches, Ivan Bondarenko, Daniil Grebenkin, Oleg Sedukhin, Roman Derunets, Georgii Mkrtchyan, Vadim Alperovich, Nikolay Bushkov, Stanislav Moiseev
-
-
 ## Motivation
 
 It is assumed that during the training process the model learns not only to generate the code and solve different tasks but also learns to process and analyze the code, e.g. to detect whether the code is correct, contains any errors etc. This dataset was developed to automatically evaluate such ability. Any model, which assess the code correctness, should be limited with a given context. To define whether the code is successfully executed, we collected such pairs {focal_code - test_code}, which do not contain the imports from the other files of the projects. Also we kept only the files which do not contain any assets usage, e.g. loading data from files.
