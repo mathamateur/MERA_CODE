@@ -1,6 +1,5 @@
 task: codelintereval
-dataset_path: MERA-evaluation/CodeLinterEval
-
+dataset_path: dataset_path
 training_split: shots
 fewshot_split: shots
 test_split: test
