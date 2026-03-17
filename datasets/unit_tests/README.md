@@ -7,8 +7,6 @@ Evaluation of unit-test generation for functions and methods in five programming
 
 Evaluated skills: Instruction Following, Long Context Comprehension, Synthesis, Testing
 
-Contributors: Alena Pestova, Valentin Malykh
-
 
 ## Motivation
 
