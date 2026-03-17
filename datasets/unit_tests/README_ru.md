@@ -7,8 +7,6 @@
 
 Тестируемые навыки моделей: Instruction Following, Long Context Comprehension, Synthesis, Testing
 
-Авторы: Алена Пестова, Валентин Малых
-
 
 ## Мотивация
 
