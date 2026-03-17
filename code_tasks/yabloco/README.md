@@ -47,11 +47,11 @@ Before running the evaluation, ensure that your environment is set up correctly.
 ### Download Dataset and Setup Environments
 
 ```bash
-cd MERA_CODE/workspace
-git clone -b mera_code https://github.com/yabloco-codegen/yabloco-benchmark
+cd AnonymCodeBench/workspace
+git clone https://github.com/yabloco-codegen/yabloco-benchmark
 ```
 
-This will download the data and evaluation code under the `workspace` directory in `MERA_CODE`.
+This will download the data and evaluation code under the `workspace` directory in `AnonymCodeBench`.
 
 ### How to Evaluate
 
