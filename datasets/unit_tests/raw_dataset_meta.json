@@ -1,6 +1,6 @@
 {
     "dataset_name": "UnitTests",
-    "license": "MERA_private",
+    "license": "private",
     "dataset_size": "len(DATA)",
     "description": "Evaluation of unit-test generation for functions and methods in five programming languages (Java, Python, Go, JavaScript, and C#).",
     "modalities": [
