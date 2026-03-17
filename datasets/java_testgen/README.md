@@ -7,9 +7,6 @@
 
 Evaluated skills: Instruction Following, Code Perception, Completion, Testing
 
-Contributors: Dmitry Salikhov, Pavel Zadorozhny, Pavel Adamenko, Rodion Levichev, Aidar Valeev, Dmitrii Babaev
-
-
 ## Motivation
 
 This dataset assesses models' ability to generate functionally valid tests for Java programs, emphasizing:
