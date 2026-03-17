@@ -1,7 +1,7 @@
 {
     "dataset_name": "JavaTestGen",
     "description": "Evaluate model ability to generate Java unit tests based on real projects.",
-    "license": "MERA_private",
+    "license": "private",
     "dataset_size": "len(DATA)",
     "modalities": ["code", "text"],
     "skills": ["Code complition", "Unit tests generation", "Contextual reasoning"],
