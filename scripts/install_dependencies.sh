@@ -4,17 +4,17 @@
 # Prerequisites
 ################################################################################
 
-### Should be launched from MERA_CODE directory
+### Should be launched from AnonymCodeBench directory
 
 ### Make sure to use in after activating the virtual environment
 
 ### How to create conda environment
-# conda create -n mera_code python=3.11.9 -y
-# conda activate mera_code
+# conda create -n bench python=3.11.9 -y
+# conda activate bench
 
 ### How to create python venv environment
-# python3.11 -m venv mera_code
-# source mera_code/bin/activate
+# python3.11 -m venv bench
+# source bench/bin/activate
 
 
 ################################################################################
@@ -57,7 +57,7 @@ cd lm-evaluation-harness
 echo "Installing lm-eval..."
 pip install -e .
 
-# go back to MERA_CODE directory
+# go back to AnonymCodeBench directory
 cd ..
 
 # If local_scoring, install the extras
@@ -72,7 +72,7 @@ if [ "$MODE" = "local_scoring" ]; then
   echo "Installing metrics for YABLoCo..."
   mkdir workspace
   cd workspace
-  git clone -b mera_code https://github.com/yabloco-codegen/yabloco-benchmark
+  git clone https://github.com/yabloco-codegen/yabloco-benchmark
   cd ..
 
 fi
