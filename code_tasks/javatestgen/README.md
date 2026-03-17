@@ -42,14 +42,7 @@ lm_eval \
   --apply_chat_template
 ```
 
-#### Example output metrics
-
-
-
 ### Notes
 - Artifacts (cloned repositories) stored at `~/.cache/repotest`.
 - Maven dependencies cached using Docker volume `maven_cache`.
 - The first run may take longer due to initial Maven dependency downloads.
-
-## License
-?
