@@ -1,7 +1,7 @@
 tag:
   - javatestgen_eval
 task: javatestgen
-dataset_path: MERA-evaluation/JavaTestGen
+dataset_path: dataset_path
 output_type: generate_until
 test_split: test
 doc_to_text: !function utils.doc_to_text_java_testgen
