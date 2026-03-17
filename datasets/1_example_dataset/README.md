@@ -51,12 +51,6 @@ Each dataset question includes data in the following fields:
     - `id` [int] — Identification number of the question in the dataset.
     - `categories` — Categorial features characterizing the test example.
         - `task_type` [str] — Task type according to the task classification in the XXX dataset;
-    - `image` — Image metadata.
-        - `synt_source` [list] — Sources used to generate or recreate data for the question, including names of generative models.
-        - `source` [list] — Information about the origin of the image — according to the image classification for MERA datasets.
-        - `type` [list] — Image type — according to the image classification for MERA datasets.
-        - `content` [list] — Image content — according to the image classification for MERA datasets.
-        - `context` [list] — Accompanying context present in the image — according to the image classification for MERA datasets.
 
 
 ### Data formatting example
