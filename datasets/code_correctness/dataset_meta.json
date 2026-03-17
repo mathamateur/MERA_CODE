@@ -1,6 +1,6 @@
 {
     "dataset_name": "CodeCorrectness",
-    "license": "MERA_private",
+    "license": "private",
     "dataset_size": 1361,
     "description": "Evaluation of the correctness of the written code for Python, Java and Go.",
     "modalities": [
