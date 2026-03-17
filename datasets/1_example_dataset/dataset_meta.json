@@ -1,6 +1,6 @@
 {
     "dataset_name": "XXX",
-    "license": "MERA_private",
+    "license": "private",
     "dataset_size": 1,
     "description": "Example dataset description (up to 200 characters).",
     "modalities": [
@@ -95,28 +95,6 @@
                 "task_type": {
                     "ru": "Тип задач в соответствии с классификацией задач в датасете XXX",
                     "en": "Task type according to the task classification in the XXX dataset"
-                }
-            },
-            "image": {
-                "synt_source": {
-                    "ru": "Источники, с помощью которых сгенерированы или воссозданы данные для формирования вопроса, в том числе названия генеративных моделей.",
-                    "en": "Sources used to generate or recreate data for the question, including names of generative models."
-                },
-                "source": {
-                    "ru": "Информация о происхождении изображения — согласно классификации изображений для датасетов MERA.",
-                    "en": "Information about the origin of the image — according to the image classification for MERA datasets."
-                },
-                "type": {
-                    "ru": "Тип изображения — согласно классификации изображений для датасетов MERA.",
-                    "en": "Image type — according to the image classification for MERA datasets."
-                },
-                "content": {
-                    "ru": "Содержание изображения — согласно классификации изображений для датасетов MERA.",
-                    "en": "Image content — according to the image classification for MERA datasets."
-                },
-                "context": {
-                    "ru": "Сопроводительный контекст, присутствующий на изображении, — согласно классификации изображений для датасетов MERA.",
-                    "en": "Accompanying context present in the image — according to the image classification for MERA datasets."
                 }
             }
         }
