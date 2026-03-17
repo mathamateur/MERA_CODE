@@ -8,9 +8,6 @@ The aim of benchmark is identifying the capabilities of models for generating an
 Tested skills: Instruction Following, Code Perception, Style Guides, Review,
 Editing
 
-Authors: Vikulov Vladimir, Bykov Anton, Piktovnikov Kirill
-
-
 ## Мотивация
 
 The aim of benchmark is identifying the capabilities of models for generating and correcting code based on linter errors.
