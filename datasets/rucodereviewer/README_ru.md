@@ -8,7 +8,6 @@
 
 Тестируемые навыки моделей: Instruction Following, Code Perception, Review, Simulation, Explanation, Programming Patters, Style Guides
 
-Авторы: Артем Завгороднев, Александр Медведев, Георгий Мкртчян, Иван Харкевич, Ильсеяр Алимова, Николай Бушков, Станислав Моисеев.
 
 
 ## Мотивация
