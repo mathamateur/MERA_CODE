@@ -4,10 +4,6 @@
 
 **RealCode** is a benchmark designed to evaluate the code generation capabilities of language models in real-world GitHub repositories. The evaluation process assesses the functional correctness of generated code by running repository-specific tests. RealCode Eval allows researchers and practitioners to gauge how well their models can complete code snippets based on real repository contexts, including function signatures, docstrings, and surrounding code.
 
-
-## Homepage
-[Visit Homepage](https://mera.a-ai.ru)
-
 ## License
 MIT License
 
