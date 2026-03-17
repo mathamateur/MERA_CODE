@@ -1,31 +1,8 @@
-# MERA Code
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/mera-code-logo-white.png">
-    <source media="(prefers-color-scheme: light)" srcset="docs/mera-code-logo-black.svg">
-    <img alt="MERA Code" src="docs/mera-code-logo-white.png" style="max-width: 100%;">
-  </picture>
-</p>
-
-<p align="center">
-    <a href="https://opensource.org/licenses/MIT">
-    <img alt="License" src="https://img.shields.io/badge/License-MIT-yellow.svg">
-    </a>
-    <a href="https://github.com/MERA-Evaluation/MERA_CODE/tree/main">
-    <img alt="Release" src="https://img.shields.io/badge/release-v1.0.0-blue">
-    </a>
-
-</p>
-
-<h2 align="center">
-    <p> MERA Code: A Unified Framework for Evaluating Code Generation Across Tasks.
-</p>
-</h2>
+# AnonymCodeBench
 
 ## 🚀 About
 
-**MERA Code** brings together a rich collection of code-focused evaluation tasks—both private and public—under one roof. Built on top of the [Language Model Evaluation Harness](https://github.com/EleutherAI/lm-evaluation-harness) (v0.4.9), it enables researchers and practitioners to:
+**AnonymCodeBench** brings together a rich collection of code-focused evaluation tasks—both private and public—under one roof. Built on top of the [Language Model Evaluation Harness](https://github.com/EleutherAI/lm-evaluation-harness) (v0.4.9), it enables researchers and practitioners to:
 
 - **Compare models** on identical tasks and metrics
 - **Reproduce results** with fixed prompts and few-shot settings
@@ -51,16 +28,16 @@
 
 ## 🛠 Getting Started <a name="evaluation"></a>
 
-First, you need to clone the MERA_CODE repository and load the submodule:
+First, you need to clone the AnonymCodeBench repository and load the submodule:
 
 ```bash
 ### Go to the folder where the repository will be cloned ###
-mkdir mera_code
-cd mera_code
+mkdir bench
+cd bench
 
 ### Clone & install core libs ###
-git clone --recurse-submodules https://github.com/MERA-Evaluation/MERA_CODE.git
-cd MERA_CODE
+git clone --recurse-submodules github_link
+cd AnonymCodeBench
 ```
 
 Now, you can choose one of two evaluation regimes, depending on whether you want to obtain the metrics for public tasks locally or intend to use our remote scoring via the website.
@@ -96,7 +73,7 @@ How it works inside
 cd lm-evaluation-harness
 pip install -e .
 
-### Go to MERA_CODE folder ###
+### Go to AnonymCodeBench folder ###
 cd ../
 ```
 
@@ -158,7 +135,7 @@ pip install -e .
 cd ..
 mkdir workspace
 cd workspace
-git clone -b mera_code https://github.com/yabloco-codegen/yabloco-benchmark
+git clone https://github.com/yabloco-codegen/yabloco-benchmark
 ```
 
 </details>
@@ -182,19 +159,9 @@ bash scripts/run_evaluation.sh --help
 ## 📁 Repository Structure
 
 ```text
-MERA_CODE/
+AnonymCodeBench/
 ├── code_tasks/                     # Code for each task
 ├── datasets/                       # Task descriptions, metadata, readme
-├── docs/                           # Additional documentation and design notes
- ├── templates                   # Templates of tasks readme
- ├── dataset_contribution.md     # How to add a new dataset into MERA Code
- ├── dataset_criteria.md         # Criteria to add a new dataset into MERA Code
- ├── dataset_formatting.md       # Dataset formatting requirements
- ├── dataset_hf.md               # How to add new datasets on the MERA HuggingFace page
- ├── dataset_review.md           # General dataset requirements
- ├── model_scoring.md            # How to use lm-eval to evaluate the LMs
- ├── task_codebase.md            # How to add a new task to the codebase
- ├── MERA_code_tax.png           # Taxonomy of coding skills
 ├── lm-evaluation-harness/          # Submodule (codebase)
 └── scripts/                        # Helpers: add tasks, run evaluations, and scoring
 ```
@@ -209,7 +176,7 @@ Follow these steps to see your model on the Leaderboard:
  > You’ll end up with a logs folder **and** a ready-to-submit zip archive like `Qwen2.5-0.5B-Instruct_submission.zip`.
 
 2. **Submit on the website**  
- Head over to [Create Submission](https://dev.score.mlrnd.ru/en/code/submits/create), upload the archive, and move on to the form.
+ Head over to [Create Submission](submission_link), upload the archive, and move on to the form.
 
 3. **Fill in Model Details**  
  Provide accurate information about the model and evaluation. These details are crucial for reproducibility—if something is missing, administrators may ping you (or your Submission might be rejected).
@@ -219,64 +186,10 @@ Follow these steps to see your model on the Leaderboard:
  > Keep in mind that if you submit more than one archive, they are scored sequentially, one after another (not in parallel).
 
 5. **Publish your result**  
- Once scoring finishes, click **"Submit for moderation"**. After approval, your model goes **Public** and appears on the [Leaderboard](https://dev.score.mlrnd.ru/en/code/leaderboard).  
+ Once scoring finishes, click **"Submit for moderation"**. After approval, your model goes **Public** and appears on the [Leaderboard](leaderboard_link).  
 
 Good luck, and happy benchmarking! 🎉
-
-
-## 🤝 Contributing
-
-We are interested in improving the MERA Code and invite the community to contribute to the development of new, complex tasks and the project's codebase. 
-
-### Steps to Add a New Task:  
-0) Develop a dataset (on the contributor's side; see [task requirements](docs/dataset_review.md))  
-1) Convert the dataset to MERA format ([guide](docs/dataset_formatting.md))  
-2) Upload the dataset to 🤗HF Hub ([guide](docs/dataset_hf.md))  
-3) Submit the dataset for MERA organizer review ([guide](docs/dataset_hf.md))  
-4) Write evaluation code using lm-harness ([guide](docs/task_codebase.md))  
-5) Benchmark state-of-the-art baseline models on the dataset 
-6) Final moderation, and your dataset is officially added!
    
 ## 📝 License
 
 Distributed under the MIT License. See LICENSE for details.
-
-
-## 📑 Cite as
-
-```
-@misc{chervyakov2025meracodeunifiedframework,
-      title={MERA Code: A Unified Framework for Evaluating Code Generation Across Tasks}, 
-      author={Artem Chervyakov and 
-        Alexander Kharitonov and 
-        Pavel Zadorozhny and 
-        Adamenko Pavel and 
-        Rodion Levichev and 
-        Dmitrii Vorobev and 
-        Dmitrii Salikhov and 
-        Aidar Valeev and 
-        Alena Pestova and 
-        Maria Dziuba and 
-        Ilseyar Alimova and 
-        Artem Zavgorodnev and 
-        Aleksandr Medvedev and 
-        Stanislav Moiseev and 
-        Elena Bruches and 
-        Daniil Grebenkin and 
-        Roman Derunets and 
-        Vikulov Vladimir and 
-        Anton Emelyanov and 
-        Dmitrii Babaev and 
-        Vladimir V. Ivanov and 
-        Valentin Malykh and 
-        Alena Fenogenova},
-      year={2025},
-      eprint={2507.12284},
-      archivePrefix={arXiv},
-      primaryClass={cs.SE},
-      url={https://arxiv.org/abs/2507.12284}, 
-}
-```
-> Read the paper on [arXiv](https://arxiv.org/abs/2507.12284)
-
-
