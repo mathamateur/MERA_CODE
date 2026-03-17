@@ -1,6 +1,6 @@
 {
     "dataset_name": "RealCode",
-    "license": "MERA_private",
+    "license": "private",
     "dataset_size": 802,
     "description": "Function body generation benchmark built from real Python repositories with executable tests. Tasks focus on filling in the body of existing functions using surrounding context.",
     "modalities": [
