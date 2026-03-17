@@ -7,8 +7,6 @@
 
 Evaluated skills: Instruction Following, Code Perception, Completion
 
-Contributors: Dmitry Vorobiev, Pavel Zadorozhny, Rodion Levichev, Pavel Adamenko, Aidar Valeev, Dmitry Salikhov, Dmitrii Babaev
-
 
 ## Motivation
 
