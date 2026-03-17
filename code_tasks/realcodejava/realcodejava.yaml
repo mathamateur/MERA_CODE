@@ -1,7 +1,7 @@
 tag:
   - realcodejava_eval
 task: realcodejava
-dataset_path: MERA-evaluation/RealCodeJava
+dataset_path: dataset_path
 output_type: generate_until
 training_split: null
 validation_split: null
