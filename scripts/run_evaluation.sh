@@ -21,7 +21,7 @@ Usage: $0 [OPTIONS]
 
 Tasks (required):
   -t, --tasks TASK1,TASK2,…   Comma-separated list of tasks to evaluate
-                              (default: all MERA Code tasks)
+                              (default: all AnonymCodeBench tasks)
 
 Model / runtime options:
   -m, --model ENGINE          lm_eval engine (hf | vllm | local-chat-completions)
@@ -42,21 +42,21 @@ Examples:
   # All tasks, hf, one GPU:
   bash scripts/run_evaluation.sh \
     --model_args "pretrained=Qwen/Qwen2.5-0.5B-Instruct,dtype=bfloat16" \
-    --output_path ./mera_code_results/Qwen2.5-0.5B-Instruct
+    --output_path ./results/Qwen2.5-0.5B-Instruct
 
   # Custom tasks, vllm, two GPUs:
   CUDA_VISIBLE_DEVICES="0,1" bash scripts/run_evaluation.sh \
     --tasks rucodeeval,realcode \
     --model vllm
     --model_args "pretrained=Qwen/Qwen2.5-0.5B-Instruct,tensor_parallel_size=2" \
-    --output_path ./mera_code_results/Qwen2.5-0.5B-Instruct
+    --output_path ./results/Qwen2.5-0.5B-Instruct
 
   # All tasks, API, save cache:
   OPENAI_API_KEY="..." bash scripts/run_evaluation.sh \
     --model openai-chat-completions
     --device cpu
     --model_args "model=gpt-4o,num_concurrent=8,timeout=90000" \
-    --output_path ./mera_code_results/gpt-4o
+    --output_path ./results/gpt-4o
     --use_cache ./models_cache/gpt-4o
   
   # All tasks, vllm serve:
@@ -64,12 +64,12 @@ Examples:
     --model local-chat-completions
     --device cpu
     --model_args "model=Qwen/Qwen2.5-0.5B-Instruct,num_concurrent=8,timeout=200,base_url=http://localhost:8888/v1/chat/completions" \
-    --output_path ./mera_code_results/Qwen2.5-0.5B-Instruct
+    --output_path ./results/Qwen2.5-0.5B-Instruct
   
   # All tasks, pre-trained (base, no chat template) model:
   bash scripts/run_evaluation.sh \
     --model_args "pretrained=bigcode/starcoder2-7b,dtype=auto" \
-    --output_path ./mera_code_results/starcoder2-7b
+    --output_path ./results/starcoder2-7b
     --no_chat_template
 
 EOF
