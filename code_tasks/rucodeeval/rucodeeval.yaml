@@ -1,5 +1,5 @@
 task: rucodeeval
-dataset_path: MERA-evaluation/ruCodeEval
+dataset_path: dataset_path
 output_type: generate_until
 
 training_split: null
