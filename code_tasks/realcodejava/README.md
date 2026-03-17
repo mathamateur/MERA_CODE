@@ -14,8 +14,8 @@ conda install conda-forge::openjdk=22 conda-forge::maven
 git clone <[repotest]>
 pip install -e repotest
 
-git clone <[MERA_CODE]>
-cd MERA_CODE
+git clone AnonymCodeBench
+cd AnonymCodeBench
 git submodule init
 git submodule update
 pip install -e lm-evaluation-harness
@@ -40,7 +40,7 @@ python -m lm_eval \
     --output_path /path/to/outputs/realcode_java \
     --trust_remote_code \
     --log_samples \
-    --include_path=/path/to/MERA_CODE/code_tasks \
+    --include_path=./code_tasks \
     --apply_chat_template
 ```
 
