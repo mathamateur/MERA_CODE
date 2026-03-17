@@ -13,8 +13,6 @@ Key features:
 
 Evaluated skills: Instruction Following, Code Perception, Simulation, Documentation
 
-Contributors: Maria Dziuba, Valentin Malykh
-
 
 ## Motivation
 
